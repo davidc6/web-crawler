@@ -1,8 +1,11 @@
-use reqwest::{Client, Error};
+use reqwest::{Client, Error, IntoUrl};
 
 pub trait Fetch {
     fn new() -> Self;
-    fn get(&self, url: &str) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+    fn get<T: IntoUrl + Send>(
+        &self,
+        url: T,
+    ) -> impl std::future::Future<Output = Result<String, Error>> + std::marker::Send;
 }
 
 #[derive(Default)]
@@ -17,7 +20,7 @@ impl Fetch for HttpFetch {
         }
     }
 
-    async fn get(&self, url: &str) -> Result<String, Error> {
+    async fn get<T: IntoUrl + Send>(&self, url: T) -> Result<String, Error> {
         let response = self.client.get(url).send().await?;
         response.text().await
     }

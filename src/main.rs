@@ -1,7 +1,13 @@
 use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
-use std::{fmt::Debug, hash::Hash, io::Error, sync::Arc};
+use reqwest::IntoUrl;
+use std::{
+    fmt::{Debug, Display},
+    hash::Hash,
+    io::Error,
+    sync::Arc,
+};
 use tokio::task::JoinSet;
 use url_crawler::{
     crawler::{crawl, crawl_seed},
@@ -33,7 +39,7 @@ struct Args {
 }
 
 async fn execute<
-    T: Send + Sync + Clone + Hash + Debug + Eq + 'static,
+    T: Send + Sync + Clone + IntoUrl + Display + Hash + Debug + Eq + 'static,
     U: Send + Sync + Debug + 'static,
 >(
     args: Args,
