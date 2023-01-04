@@ -3,6 +3,7 @@ use std::{fmt::Debug, hash::Hash, sync::Arc};
 use tokio::sync::RwLock;
 
 pub type Deps<T, U> = Arc<RwLock<Dependencies<T, U>>>;
+pub type DepsConcrete = Arc<RwLock<Dependencies<String, String>>>;
 
 #[derive(Default)]
 pub struct DataStore {}

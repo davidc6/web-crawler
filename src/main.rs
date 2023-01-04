@@ -1,18 +1,12 @@
 use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
-use reqwest::IntoUrl;
-use std::{
-    fmt::{Debug, Display},
-    hash::Hash,
-    io::Error,
-    sync::Arc,
-};
+use std::{fmt::Debug, io::Error, sync::Arc};
 use tokio::task::JoinSet;
 use url_crawler::{
     crawler::{crawl, crawl_seed},
     data_store::Store,
-    dependencies::{Dependencies, Deps},
+    dependencies::{Dependencies, DepsConcrete},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
     url_frontier::URLFrontierBuilder,
@@ -38,13 +32,7 @@ struct Args {
     print: bool,
 }
 
-async fn execute<
-    T: Send + Sync + Clone + IntoUrl + Display + Hash + Debug + Eq + 'static,
-    U: Send + Sync + Debug + 'static,
->(
-    args: Args,
-    deps: Deps<T, U>,
-) -> Result<(), Error> {
+async fn execute(args: Args, deps: DepsConcrete) -> Result<(), Error> {
     let Args { url, workers_n, .. } = args;
 
     let original_url_parts = Arc::new(url_parts(&url));

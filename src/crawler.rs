@@ -3,12 +3,12 @@ use reqwest::IntoUrl;
 
 use crate::{
     data_store::DataStore,
-    dependencies::Deps,
+    dependencies::{Deps, DepsConcrete},
     fetch::Fetch,
     fetch::HttpFetch,
     parser::Parser,
-    url::{self, process_url, UrlParts},
-    url_frontier::Dequeue,
+    url::{self, filter_url, process_url, UrlParts},
+    url_frontier::{Dequeue, Enqueue},
 };
 use std::{
     fmt::{Debug, Display},
@@ -17,11 +17,8 @@ use std::{
     sync::Arc,
 };
 
-pub async fn crawl_seed<
-    T: Hash + Eq + Clone + Debug + Send + Sync + IntoUrl + Display + 'static,
-    U: Send + Sync + Debug + 'static,
->(
-    deps: Deps<T, U>,
+pub async fn crawl_seed(
+    deps: DepsConcrete,
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) -> Result<(), Error> {
@@ -31,8 +28,8 @@ pub async fn crawl_seed<
     Ok(())
 }
 
-pub async fn crawl<T: Hash + Eq + Debug + Display + Clone + Send + IntoUrl, U: Debug + 'static>(
-    deps: Deps<T, U>,
+pub async fn crawl(
+    deps: DepsConcrete,
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) {
@@ -67,6 +64,14 @@ pub async fn crawl<T: Hash + Eq + Debug + Display + Clone + Send + IntoUrl, U: D
             info!("Found URL: {}", url);
 
             deps.data_store.add(current_url.clone(), Some(url.clone()));
+
+            if let Some(url) = filter_url(url, original_url_parts.clone()) {
+                if !deps.data_store.has_visited(&url) {
+                    deps.url_frontier.enqueue(url);
+                }
+            };
         }
+
+        info!("--------------------------------------------");
     }
 }
