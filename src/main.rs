@@ -1,4 +1,6 @@
 use clap::Parser as ClapParser;
+use env_logger::Env;
+use log::info;
 
 #[derive(ClapParser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -21,7 +23,10 @@ struct Args {
 }
 
 fn main() {
+    // If RUST_LOG env is not set, fallback to printing all logs at info-level or above
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+
     let cli_args = Args::parse();
 
-    println!("CLI args: {:?}", cli_args);
+    info!("Initialising with seed url: {}", cli_args.url);
 }
