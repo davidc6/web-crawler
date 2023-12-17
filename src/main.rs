@@ -1,8 +1,12 @@
 use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
-use std::io::Error;
-use url_crawler::dependencies::{Dependencies, Deps};
+use std::{io::Error, sync::Arc};
+use url_crawler::{
+    dependencies::{Dependencies, Deps},
+    fetch::{Fetch, HttpFetch},
+    url::url_parts,
+};
 
 #[derive(ClapParser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -25,6 +29,15 @@ struct Args {
 }
 
 async fn execute(args: Args, deps: Deps) -> Result<(), Error> {
+    let Args { url, workers_n, .. } = args;
+
+    let original_url_parts = Arc::new(url_parts(&url));
+
+    for _n in 0..workers_n {
+        let client: HttpFetch = Fetch::new(); // each worker gets a HTTP client
+        let is_initial_crawl = true;
+    }
+
     Ok(())
 }
 
