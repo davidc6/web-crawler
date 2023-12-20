@@ -2,7 +2,9 @@ use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
 use std::{io::Error, sync::Arc};
+use tokio::task::JoinSet;
 use url_crawler::{
+    crawler::{crawl, crawl_seed},
     dependencies::{Dependencies, Deps},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
@@ -33,9 +35,21 @@ async fn execute(args: Args, deps: Deps) -> Result<(), Error> {
 
     let original_url_parts = Arc::new(url_parts(&url));
 
+    // first thread to fetch the links from the seed url
+    let client: HttpFetch = Fetch::new();
+    crawl_seed(deps.clone(), client, original_url_parts.clone()).await?;
+
+    let mut tasks = JoinSet::new();
+
     for _n in 0..workers_n {
         let client: HttpFetch = Fetch::new(); // each worker gets a HTTP client
-        let is_initial_crawl = true;
+        let task = tokio::spawn(crawl(deps.clone(), client, original_url_parts.clone()));
+
+        tasks.spawn(task);
+    }
+
+    while let Some(_res) = tasks.join_next().await {
+        info!("Worker completed");
     }
 
     Ok(())
