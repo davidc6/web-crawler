@@ -8,6 +8,7 @@ use url_crawler::{
     dependencies::{Dependencies, Deps},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
+    url_frontier::URLFrontierBuilder,
 };
 
 #[derive(ClapParser, Debug)]
@@ -30,7 +31,7 @@ struct Args {
     print: bool,
 }
 
-async fn execute(args: Args, deps: Deps) -> Result<(), Error> {
+async fn execute<T: Send + 'static>(args: Args, deps: Deps<T>) -> Result<(), Error> {
     let Args { url, workers_n, .. } = args;
 
     let original_url_parts = Arc::new(url_parts(&url));
@@ -64,8 +65,14 @@ async fn main() {
 
     info!("Initialising with seed url: {}", cli_args.url);
 
-    let deps = Dependencies::new();
-    match execute(cli_args, deps).await {
+    let url_frontier = URLFrontierBuilder::new()
+        .delay_s(cli_args.delay)
+        .value(cli_args.url.clone())
+        .build();
+
+    let deps = Dependencies::new().url_frontier(url_frontier).build();
+
+    match execute::<String>(cli_args, deps).await {
         Ok(_) => {
             info!("Done");
         }
