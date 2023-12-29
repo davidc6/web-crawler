@@ -1,10 +1,11 @@
 use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
-use std::{io::Error, sync::Arc};
+use std::{fmt::Debug, hash::Hash, io::Error, sync::Arc};
 use tokio::task::JoinSet;
 use url_crawler::{
     crawler::{crawl, crawl_seed},
+    data_store::Store,
     dependencies::{Dependencies, Deps},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
@@ -31,7 +32,13 @@ struct Args {
     print: bool,
 }
 
-async fn execute<T: Send + 'static>(args: Args, deps: Deps<T>) -> Result<(), Error> {
+async fn execute<
+    T: Send + Sync + Clone + Hash + Debug + Eq + 'static,
+    U: Send + Sync + Debug + 'static,
+>(
+    args: Args,
+    deps: Deps<T, U>,
+) -> Result<(), Error> {
     let Args { url, workers_n, .. } = args;
 
     let original_url_parts = Arc::new(url_parts(&url));
@@ -70,9 +77,14 @@ async fn main() {
         .value(cli_args.url.clone())
         .build();
 
-    let deps = Dependencies::new().url_frontier(url_frontier).build();
+    let data_store = Store::new();
 
-    match execute::<String>(cli_args, deps).await {
+    let deps = Dependencies::new()
+        .url_frontier(url_frontier)
+        .data_store(data_store)
+        .build();
+
+    match execute::<_, String>(cli_args, deps).await {
         Ok(_) => {
             info!("Done");
         }

@@ -1,4 +1,5 @@
 pub mod crawler;
+pub mod data_store;
 pub mod dependencies;
 pub mod fetch;
 pub mod parser;
