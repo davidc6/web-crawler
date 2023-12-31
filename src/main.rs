@@ -77,14 +77,14 @@ async fn main() {
         .value(cli_args.url.clone())
         .build();
 
-    let data_store = Store::new();
+    let data_store: Store<_, String> = Store::new();
 
     let deps = Dependencies::new()
         .url_frontier(url_frontier)
         .data_store(data_store)
         .build();
 
-    match execute::<_, String>(cli_args, deps).await {
+    match execute(cli_args, deps).await {
         Ok(_) => {
             info!("Done");
         }

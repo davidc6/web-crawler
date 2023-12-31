@@ -38,10 +38,7 @@ impl<T: Clone + Hash + Eq, U> Store<T, U> {
     }
 }
 
-impl<T: Debug + Clone + Hash + Eq, U: Debug + 'static> DataStore<T, U> for Store<T, U>
-// where
-//     std::string::String: std::borrow::Borrow<T>,
-{
+impl<T: Debug + Clone + Hash + Eq, U: Debug + 'static> DataStore<T, U> for Store<T, U> {
     fn add(&mut self, key: T, value: Option<U>) {
         let item = self.data.get_mut(&key);
 
