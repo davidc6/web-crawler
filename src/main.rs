@@ -71,7 +71,7 @@ async fn main() {
         .value(cli_args.url.clone())
         .build();
 
-    let data_store: Store<_, String> = Store::new();
+    let data_store = Store::new();
 
     let deps = Dependencies::new()
         .url_frontier(url_frontier)
