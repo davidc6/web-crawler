@@ -1,21 +1,14 @@
-use log::{info, warn};
-use reqwest::IntoUrl;
-
 use crate::{
     data_store::DataStore,
-    dependencies::{Deps, DepsConcrete},
+    dependencies::DepsConcrete,
     fetch::Fetch,
     fetch::HttpFetch,
     parser::Parser,
     url::{self, filter_url, process_url, UrlParts},
     url_frontier::{Dequeue, Enqueue},
 };
-use std::{
-    fmt::{Debug, Display},
-    hash::Hash,
-    io::Error,
-    sync::Arc,
-};
+use log::{info, warn};
+use std::{io::Error, sync::Arc};
 
 pub async fn crawl_seed(
     deps: DepsConcrete,
