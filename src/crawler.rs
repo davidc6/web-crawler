@@ -15,8 +15,7 @@ pub async fn crawl_seed(
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) -> Result<(), Error> {
-    let client: HttpFetch = Fetch::new();
-    let task = tokio::spawn(crawl(deps.clone(), client, original_url_parts.clone()));
+    let task = tokio::spawn(crawl(deps.clone(), http, original_url_parts.clone()));
     task.await?;
     Ok(())
 }
