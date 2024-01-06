@@ -2,7 +2,7 @@ use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
 use std::{fmt::Debug, io::Error, sync::Arc};
-use tokio::task::JoinSet;
+use tokio::{sync::RwLock, task::JoinSet};
 use url_crawler::{
     crawler::{crawl, crawl_seed},
     data_store::Store,
@@ -74,8 +74,8 @@ async fn main() {
     let data_store = Store::new();
 
     let deps = Dependencies::new()
-        .url_frontier(url_frontier)
-        .data_store(data_store)
+        .url_frontier(Arc::new(RwLock::new(url_frontier)))
+        .data_store(Arc::new(RwLock::new(data_store)))
         .build();
 
     match execute(cli_args, deps).await {
