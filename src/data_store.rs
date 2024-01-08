@@ -19,15 +19,9 @@ pub trait DataStore<T, U: 'static>: Debug {
     fn get<'a>(&'a self, key: &T) -> Option<&'a DataStoreEntry<U>>;
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct Store<T: Hash + Eq + Clone, U> {
     data: HashMap<T, DataStoreEntry<U>>,
-}
-
-impl<T: Hash + Eq + Clone, U> Default for Store<T, U> {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl<T: Clone + Hash + Eq, U> Store<T, U> {
