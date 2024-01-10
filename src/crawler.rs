@@ -1,10 +1,8 @@
 use crate::{
-    data_store::DataStore,
-    dependencies::{Deps, DepsConcrete},
+    dependencies::DepsConcrete,
     fetch::{Fetch, HttpFetch},
     parser::Parser,
     url::{self, filter_url, process_url, UrlParts},
-    url_frontier::{Dequeue, Enqueue},
 };
 use log::{info, warn};
 use std::{io::Error, sync::Arc};
@@ -330,11 +328,6 @@ mod task_tests {
         let url_parts = Arc::new(url_parts(&main_url));
         let url_frontier = Arc::new(RwLock::new(url_frontier_mock));
         let data_store = Arc::new(RwLock::new(data_store_mock));
-        // let deps = Arc::new(Dependencies {
-        //     url_frontier,
-        //     data_store,
-        // });
-        let is_initial_crawl = true;
 
         let deps = Dependencies::new()
             .url_frontier(url_frontier)
