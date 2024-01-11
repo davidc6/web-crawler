@@ -23,15 +23,17 @@ pub async fn crawl(
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) {
     let mut url_frontier_write = deps.url_frontier.write().await;
-    let mut data_store_write = deps.data_store.write().await;
+    let mut data_store = deps.data_store.write().await;
 
     loop {
         let Some(current_url) = url_frontier_write.dequeue().await else {
             return;
         };
-        if data_store_write.has_visited(&current_url) {
+
+        if data_store.has_visited(&current_url) {
             continue;
         }
+
         let content = http.get(current_url.clone()).await;
         if content.is_err() {
             warn!(
@@ -42,8 +44,9 @@ pub async fn crawl(
             continue;
         };
         let content = content.unwrap();
-        data_store_write.add(current_url.clone(), None);
-        data_store_write.visited(&current_url);
+
+        data_store.add(current_url.clone(), None);
+        data_store.visited(&current_url);
 
         let urls_founds = Parser::new(content).all_links();
 
@@ -53,10 +56,10 @@ pub async fn crawl(
             let url = process_url(url, &current_url);
             info!("Found URL: {}", url);
 
-            data_store_write.add(current_url.clone(), Some(url.clone()));
+            data_store.add(current_url.clone(), Some(url.clone()));
 
             if let Some(url) = filter_url(url, original_url_parts.clone()) {
-                if !data_store_write.has_visited(&url) {
+                if !data_store.has_visited(&url) {
                     url_frontier_write.enqueue(url);
                 }
             };
