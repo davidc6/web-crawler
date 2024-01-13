@@ -20,6 +20,12 @@ pub struct URLFrontier<T> {
     delay_s: Option<u64>,
 }
 
+impl<T> URLFrontier<T> {
+    pub fn set_delay(&mut self, delay_s: Option<u64>) {
+        self.delay_s = delay_s;
+    }
+}
+
 impl<T> Queue<T> for URLFrontier<T> where T: Send {}
 
 #[async_trait]
