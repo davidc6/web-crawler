@@ -22,7 +22,7 @@ pub async fn crawl(
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) {
-    let mut url_frontier_write = deps.url_frontier.write().await;
+    let mut url_frontier_write = deps.url_frontier.0.write().await;
     let mut data_store = deps.data_store.write().await;
 
     loop {
@@ -73,7 +73,7 @@ pub async fn crawl(
 mod task_tests {
     use crate::crawler::crawl;
     use crate::data_store::{DataStore, DataStoreEntry};
-    use crate::dependencies::Dependencies;
+    use crate::dependencies::{Dependencies, Frontier, Options};
     use crate::fetch::{Fetch, HttpFetch};
     use crate::url::url_parts;
     use crate::url_frontier::{Dequeue, Enqueue, Queue};
@@ -332,10 +332,13 @@ mod task_tests {
         let url_frontier = Arc::new(RwLock::new(url_frontier_mock));
         let data_store = Arc::new(RwLock::new(data_store_mock));
 
-        let deps = Dependencies::new()
-            .url_frontier(url_frontier)
-            .data_store(data_store)
-            .build();
+        let deps = Dependencies::new(Options {
+            delay_s: None,
+            uri: "".to_owned(),
+        })
+        .url_frontier(Frontier(url_frontier))
+        .data_store(data_store)
+        .build();
 
         crawl(deps, client, url_parts).await;
     }
