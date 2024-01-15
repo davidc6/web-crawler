@@ -6,10 +6,10 @@ use tokio::{sync::RwLock, task::JoinSet};
 use url_crawler::{
     crawler::{crawl, crawl_seed},
     data_store::Store,
-    dependencies::{Dependencies, DepsConcrete},
+    dependencies::{q, Dependencies, DepsConcrete, Options},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
-    url_frontier::URLFrontierBuilder,
+    url_frontier::{self, URLFrontierBuilder},
 };
 
 #[derive(ClapParser, Debug)]
@@ -66,17 +66,20 @@ async fn main() {
 
     info!("Initialising with seed url: {}", cli_args.url);
 
-    let url_frontier = URLFrontierBuilder::new()
-        .delay_s(cli_args.delay)
-        .value(cli_args.url.clone())
-        .build();
-
+    // { opts: { delay, url } }
+    let url_frontier = q(Options {
+        delay_s: Some(cli_args.delay),
+        uri: cli_args.url.clone(),
+    });
     let data_store = Store::new();
 
-    let deps = Dependencies::new()
-        .url_frontier(Arc::new(RwLock::new(url_frontier)))
-        .data_store(Arc::new(RwLock::new(data_store)))
-        .build();
+    let deps = Dependencies::new(Options {
+        delay_s: Some(cli_args.delay),
+        uri: cli_args.url.clone(),
+    })
+    .url_frontier(url_frontier)
+    .data_store(Arc::new(RwLock::new(data_store)))
+    .build();
 
     match execute(cli_args, deps).await {
         Ok(_) => {
