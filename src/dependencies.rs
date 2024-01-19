@@ -8,7 +8,7 @@ use tokio::sync::RwLock;
 pub type Deps<T, U> = Arc<RwLock<Dependencies<T, U>>>;
 pub type DepsConcrete = Arc<Dependencies<String, String>>;
 
-// Implement the Deref trair in order to access impl Queue without having to .0
+// Implement the Deref trait in order to access impl Queue without having to .0
 impl<T> Deref for Frontier<T> {
     type Target = Arc<RwLock<dyn Queue<T> + Send + Sync>>;
 
