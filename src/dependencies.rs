@@ -1,6 +1,6 @@
 use crate::{
     data_store::{DataStore, Store},
-    url_frontier::{self, Queue, URLFrontier, URLFrontierBuilder},
+    url_frontier::{Queue, URLFrontierBuilder},
 };
 use std::{fmt::Debug, hash::Hash, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;

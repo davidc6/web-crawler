@@ -9,7 +9,6 @@ use url_crawler::{
     dependencies::{url_frontier, Dependencies, DepsConcrete, UrlFrontierOptions},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
-    url_frontier::{self, URLFrontierBuilder},
 };
 
 #[derive(ClapParser, Debug)]
