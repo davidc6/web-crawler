@@ -29,11 +29,30 @@ pub fn url_frontier<T: Send + Sync + Default + 'static>(
     opts: UrlFrontierOptions<T>,
 ) -> Frontier<T> {
     let url_frontier = URLFrontierBuilder::default()
-        .delay_s(opts.delay_s.unwrap())
+        .delay_s(opts.delay_s.unwrap_or(0))
         .value(opts.uri)
         .build();
 
     Frontier(Arc::new(RwLock::new(url_frontier)))
+}
+
+// Implement the Deref trait in order to access impl Queue without having to .0
+impl<T, U> Deref for MemoryStore<T, U> {
+    type Target = Arc<RwLock<dyn DataStore<T, U> + Send + Sync>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub struct MemoryStore<T, U>(pub Arc<RwLock<dyn DataStore<T, U> + Send + Sync>>);
+
+pub fn data_store<
+    T: Hash + Eq + Clone + Debug + Send + Sync + 'static,
+    U: Send + Sync + Debug + 'static,
+>() -> MemoryStore<T, U> {
+    let store = Store::new();
+    MemoryStore(Arc::new(RwLock::new(store)))
 }
 
 impl<
@@ -44,7 +63,7 @@ impl<
     pub fn new() -> Dependencies<T, U> {
         Dependencies {
             url_frontier: url_frontier(UrlFrontierOptions::default()),
-            data_store: Arc::new(RwLock::new(Store::default())),
+            data_store: data_store(),
         }
     }
 
@@ -56,10 +75,7 @@ impl<
         }
     }
 
-    pub fn data_store(
-        self,
-        data_store: Arc<RwLock<dyn DataStore<T, U> + Send + Sync>>,
-    ) -> Dependencies<T, U> {
+    pub fn data_store(self, data_store: MemoryStore<T, U>) -> Dependencies<T, U> {
         let Self { url_frontier, .. } = self;
         Dependencies {
             url_frontier,
@@ -77,5 +93,5 @@ impl<
 
 pub struct Dependencies<T: Clone + Hash + Eq, U> {
     pub url_frontier: Frontier<T>,
-    pub data_store: Arc<RwLock<dyn DataStore<T, U> + Send + Sync>>,
+    pub data_store: MemoryStore<T, U>,
 }
