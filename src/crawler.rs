@@ -73,7 +73,7 @@ pub async fn crawl(
 mod task_tests {
     use crate::crawler::crawl;
     use crate::data_store::{DataStore, DataStoreEntry};
-    use crate::dependencies::{Dependencies, Frontier};
+    use crate::dependencies::{Dependencies, Frontier, MemoryStore};
     use crate::fetch::{Fetch, HttpFetch};
     use crate::url::url_parts;
     use crate::url_frontier::{Dequeue, Enqueue, Queue};
@@ -334,7 +334,7 @@ mod task_tests {
 
         let deps = Dependencies::new()
             .url_frontier(Frontier(url_frontier))
-            .data_store(data_store)
+            .data_store(MemoryStore(data_store))
             .build();
 
         crawl(deps, client, url_parts).await;
