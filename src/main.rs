@@ -6,7 +6,7 @@ use tokio::{sync::RwLock, task::JoinSet};
 use url_crawler::{
     crawler::{crawl, crawl_seed},
     data_store::Store,
-    dependencies::{url_frontier, Dependencies, DepsConcrete, UrlFrontierOptions},
+    dependencies::{data_store, url_frontier, Dependencies, DepsConcrete, UrlFrontierOptions},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
 };
@@ -69,11 +69,11 @@ async fn main() {
         delay_s: Some(cli_args.delay),
         uri: cli_args.url.clone(),
     });
-    let data_store = Store::new();
+    let data_store = data_store();
 
     let deps = Dependencies::new()
         .url_frontier(url_frontier)
-        .data_store(Arc::new(RwLock::new(data_store)))
+        .data_store(data_store)
         .build();
 
     match execute(cli_args, deps).await {
