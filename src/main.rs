@@ -2,10 +2,9 @@ use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
 use std::{fmt::Debug, io::Error, sync::Arc};
-use tokio::{sync::RwLock, task::JoinSet};
+use tokio::task::JoinSet;
 use url_crawler::{
     crawler::{crawl, crawl_seed},
-    data_store::Store,
     dependencies::{data_store, url_frontier, Dependencies, DepsConcrete, UrlFrontierOptions},
     fetch::{Fetch, HttpFetch},
     url::url_parts,
