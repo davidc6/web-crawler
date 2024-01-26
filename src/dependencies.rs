@@ -58,6 +58,16 @@ pub fn data_store<
 impl<
         T: Clone + Default + Debug + Hash + Eq + Send + Sync + 'static,
         U: Send + Debug + Sync + Default + 'static,
+    > Default for Dependencies<T, U>
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<
+        T: Clone + Default + Debug + Hash + Eq + Send + Sync + 'static,
+        U: Send + Debug + Sync + Default + 'static,
     > Dependencies<T, U>
 {
     pub fn new() -> Dependencies<T, U> {
