@@ -35,7 +35,7 @@ async fn execute(args: Args, deps: DepsConcrete) -> Result<(), Error> {
 
     let original_url_parts = Arc::new(url_parts(&url));
 
-    // first thread to fetch the links from the seed url
+    // first thread attempts to crawl the seed url
     let client: HttpFetch = Fetch::new();
     crawl_seed(deps.clone(), client, original_url_parts.clone()).await?;
 
