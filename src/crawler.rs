@@ -1,14 +1,15 @@
 use crate::{
-    dependencies::DepsConcrete,
+    dependencies::{Dependencies, Deps, DepsConcrete},
     fetch::{Fetch, HttpFetch},
     parser::Parser,
     url::{self, filter_url, process_url, UrlParts},
 };
 use log::{info, warn};
-use std::{io::Error, sync::Arc};
+use reqwest::IntoUrl;
+use std::{fmt::Display, hash::Hash, io::Error, sync::Arc};
 
-pub async fn crawl_seed(
-    deps: DepsConcrete,
+pub async fn crawl_seed<T: Clone + Hash + Eq + IntoUrl + Send + Display + AsRef<str>, U>(
+    deps: Dependencies<T, U>,
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) -> Result<(), Error> {
@@ -17,8 +18,8 @@ pub async fn crawl_seed(
     Ok(())
 }
 
-pub async fn crawl(
-    deps: DepsConcrete,
+pub async fn crawl<T: Clone + Hash + Eq + IntoUrl + Send + Display + AsRef<str>, U>(
+    deps: Dependencies<T, U>,
     http: HttpFetch,
     original_url_parts: Arc<Result<UrlParts, url::Error>>,
 ) {

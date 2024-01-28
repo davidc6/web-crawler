@@ -1,11 +1,13 @@
 use clap::Parser as ClapParser;
 use env_logger::Env;
 use log::{info, warn};
-use std::{fmt::Debug, io::Error, sync::Arc};
+use std::{fmt::Debug, hash::Hash, io::Error, sync::Arc};
 use tokio::task::JoinSet;
 use url_crawler::{
     crawler::{crawl, crawl_seed},
-    dependencies::{data_store, url_frontier, Dependencies, DepsConcrete, UrlFrontierOptions},
+    dependencies::{
+        data_store, url_frontier, Dependencies, Deps, DepsConcrete, UrlFrontierOptions,
+    },
     fetch::{Fetch, HttpFetch},
     url::url_parts,
 };
@@ -30,7 +32,7 @@ struct Args {
     print: bool,
 }
 
-async fn execute(args: Args, deps: DepsConcrete) -> Result<(), Error> {
+async fn execute<T: Clone + Hash + Eq, U>(args: Args, deps: Deps<T, U>) -> Result<(), Error> {
     let Args { url, workers_n, .. } = args;
 
     let original_url_parts = Arc::new(url_parts(&url));

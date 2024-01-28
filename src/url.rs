@@ -1,5 +1,9 @@
 use addr::parse_domain_name;
-use std::sync::Arc;
+use std::{
+    fmt::{Debug, Display},
+    hash::Hash,
+    sync::Arc,
+};
 use url::{ParseError, Url};
 
 #[derive(Debug, PartialEq)]
@@ -56,9 +60,12 @@ pub fn url_parts(url: &str) -> Result<UrlParts, Error> {
     })
 }
 
-pub fn process_url(url: String, original_url: &str) -> String {
+pub fn process_url<T: Hash + Eq + Debug + Clone + Display>(
+    url: String,
+    original_url: impl AsRef<str>,
+) -> T {
     if Url::parse(&url) == Err(ParseError::RelativeUrlWithoutBase) {
-        let original_url = Url::parse(original_url).unwrap();
+        let original_url = Url::parse(original_url.as_ref()).unwrap();
         let absolute_url = original_url.join(&url);
         absolute_url.unwrap().as_str().to_owned()
     } else {
